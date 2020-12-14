@@ -6,15 +6,26 @@ import (
 )
 
 func TestHashRing(t *testing.T) {
-	vNodes := new(Nodes)
 
-	var servers []Server
-	servers = append(servers, Server{"127.0.0.1", 1}, Server{"127.0.0.2", 2}, Server{"127.0.0.3", 3})
+	server := make(map[string]int)
+	//server["127.0.0.1"] = 1
+	//server["127.0.0.2"] = 2
+	//server["127.0.0.3"] = 3
 
-	vNodes.SetVirtualNodesArray(servers)
-
-	fname := "2.jpg"
-	sha256 := HashSha256(fname)
-	ip := vNodes.getNodeSever(sha256)
-	fmt.Println(ip)
+	ring := NewHashRing(server)
+	ring.Add(Server{
+		Addr:   "127.0.0.1",
+		Weight: 1,
+	})
+	ring.Add(Server{
+		Addr:   "127.0.0.2",
+		Weight: 2,
+	})
+	ring.Add(Server{
+		Addr:   "127.0.0.3",
+		Weight: 3,
+	})
+	sha256 := HashSha256("1.jpg")
+	getServer := ring.GetServer(sha256)
+	fmt.Println(getServer)
 }
