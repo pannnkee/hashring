@@ -8,20 +8,23 @@ import (
 	"sync"
 )
 
+// 服务节点
 type Server struct {
 	Addr string
 	Weight int
 }
 
 const (
-	DefaultVirtualNodeNum = 100
+	DefaultVirtualNodeNum = 100  //默认虚拟节点数量
 )
 
+// 虚拟节点
 type VirtualNode struct {
 	NodeKey string
 	SpotValue uint32
 }
 
+// 虚拟节点集合
 type NodeArray []VirtualNode
 
 func (s NodeArray) Len() int {return len(s)}
@@ -29,6 +32,7 @@ func (s NodeArray) Less(i,j int) bool {return s[i].SpotValue < s[j].SpotValue}
 func (s NodeArray) Swap(i,j int) {s[i].SpotValue, s[j].SpotValue = s[j].SpotValue, s[i].SpotValue}
 func (s NodeArray) Sort() {sort.Sort(s)}
 
+// 哈希环
 type HashRing struct {
 	Mu *sync.RWMutex
 	Servers map[string]int
@@ -62,16 +66,18 @@ func (s *HashRing) Generate() {
 		return
 	}
 
-	//var SpotNums int
+
 	for k,v := range s.Servers {
+		// 根据server权重设置虚拟节点数量
 		totalSpotNums := DefaultVirtualNodeNum * v
 		for i := 0; i < totalSpotNums; i++ {
 			iString := strconv.Itoa(i)
-			virtuallAddr := fmt.Sprintf("%v:%v", k, iString)
 
+			// 构造虚拟节点地址 eg:127.0.0.1:3306
+			virtualAddr := fmt.Sprintf("%v:%v", k, iString)
 			virtualNode := &VirtualNode{
 				NodeKey:   k,
-				SpotValue: HashSha256(virtuallAddr),
+				SpotValue: HashSha256(virtualAddr),
 			}
 			s.Nodes = append(s.Nodes, *virtualNode)
 		}
@@ -85,6 +91,7 @@ func (s *HashRing) GetServer(w uint32) (addr string) {
 	return s.Nodes[i].NodeKey
 }
 
+// 计算哈希值
 func HashSha256(s string) (v uint32) {
 	hash := sha256.New()
 	hash.Write([]byte(s))
