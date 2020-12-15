@@ -8,10 +8,6 @@ import (
 func TestHashRing(t *testing.T) {
 
 	server := make(map[string]int)
-	//server["127.0.0.1"] = 1
-	//server["127.0.0.2"] = 2
-	//server["127.0.0.3"] = 3
-
 	ring := NewHashRing(server)
 	ring.Add(Server{
 		Addr:   "127.0.0.1",
@@ -25,7 +21,21 @@ func TestHashRing(t *testing.T) {
 		Addr:   "127.0.0.3",
 		Weight: 3,
 	})
-	sha256 := HashSha256("1.jpg")
-	getServer := ring.GetServer(sha256)
-	fmt.Println(getServer)
+
+	fmt.Println(ring.GetServer(HashSha256("1")))
+	fmt.Println(ring.GetServer(HashSha256("1.jpg")))
+	fmt.Println(ring.GetServer(HashSha256("666.png")))
+	fmt.Println(ring.GetServer(HashSha256("pannnkee.jpg")))
+
+	fmt.Println("delete")
+
+	ring.Delete(Server{
+		Addr:   "127.0.0.3",
+		Weight: 3,
+	})
+	fmt.Println(ring.GetServer(HashSha256("1")))
+	fmt.Println(ring.GetServer(HashSha256("1.jpg")))
+	fmt.Println(ring.GetServer(HashSha256("666.png")))
+	fmt.Println(ring.GetServer(HashSha256("pannnkee.jpg")))
+
 }
